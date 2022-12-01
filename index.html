@@ -1,0 +1,851 @@
+<!DOCTYPE html>
+<html lang="ja">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CSS Gridでいろいろなレイアウトを作ってみる</title>
+    <style>
+        html {
+            font-size: 16px;
+        }
+
+        body {
+            font-size: 1rem;
+            line-height: 1.65;
+        }
+
+        img {
+            vertical-align: bottom;
+        }
+
+        h1 {
+            font-size: 1.4rem;
+        }
+
+        h1:not(:first-of-type) {
+            margin-top: 100px;
+        }
+
+        h2 {
+            font-size: 1.2rem;
+            margin-top: 50px;
+        }
+
+        code {
+            box-sizing: border-box;
+        }
+
+
+        .code h3 {
+            font-size: 1rem;
+            margin-top: 0;
+            margin-bottom: 0;
+        }
+
+
+        .code pre {
+            margin-top: 0;
+        }
+
+        .preview {
+            display: grid;
+            grid-template-columns: repeat(2, calc(50% - 1rem));
+            grid-gap: 2rem;
+        }
+
+        .readtext {
+            background: #eee;
+            padding: 1rem;
+            margin-bottom: 100px;
+        }
+
+        @media screen and (max-width: 600px) {
+            .preview {
+                grid-template-columns: 100%;
+                grid-gap: 0;
+            }
+        }
+
+
+
+        /* ここからグリッドレイアウト用 */
+        .grid {
+            display: grid;
+        }
+
+        .bg-red {
+            background: rgb(254, 234, 234);
+        }
+
+        .bg-green {
+            background: rgb(211, 255, 230);
+        }
+
+        .bg-blue {
+            background: rgb(213, 225, 255);
+        }
+
+        .bg-orange {
+            background: rgb(255, 235, 173);
+        }
+
+        .fluid {
+            max-width: 100%;
+            height: auto;
+        }
+
+
+
+        /* 2カラム */
+        .grid-2clm {
+            grid-template-columns: 200px 1fr;
+        }
+
+        /* 3カラム */
+        .grid-3clm {
+            grid-template-columns: 150px 1fr 150px;
+        }
+
+        /* 聖杯 */
+        .grid-hg {
+            grid-template-columns: 150px 1fr 150px;
+        }
+
+        .clmn-header,
+        .clmn-footer {
+            grid-column: 1 / 4;
+        }
+
+        /* 写真とテキスト */
+        .grid-photo {
+            grid-template-columns: 1fr 1fr;
+            grid-template-rows: 1fr auto;
+            grid-gap: 0 1rem
+        }
+
+        .clmn-photo {
+            grid-row: 1 / 3;
+        }
+
+        /* HTMLはそのままで左右入れ替え */
+        .grid-photo-reverse .clmn-photo {
+            grid-column: 2 / 3;
+        }
+
+        /* 大バナーと小バナー */
+        .grid-banner {
+            grid-template-columns: 2fr 1fr;
+            grid-auto-rows: 0.25fr
+        }
+
+        .clmn-banner-l {
+            grid-row: 1 / 5
+        }
+
+        .clmn-banner-s {
+            overflow: hidden;
+        }
+
+        .clmn-banner-s img {
+            object-fit: cover;
+            width: 100%;
+            height: 100%;
+            object-position: center center;
+        }
+
+        /* 折り返しのある一覧 */
+        .grid-list {
+            grid-template-columns: repeat(auto-fill, 150px);
+            grid-gap: 20px;
+        }
+
+        .clmn-list {
+            padding: 10px;
+            border: 1px solid #ddd;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+            border-radius: 4px;
+        }
+
+        /* 敷き詰める */
+        .grid-tile {
+            grid-template-columns: repeat(4, 1fr)
+        }
+
+        .clmn-tile:nth-child(5n - 4) {
+            grid-row: auto / span 2;
+            grid-column: auto / span 2;
+        }
+
+        .clmn-tile:nth-child(5n - 1) {
+            grid-row: auto / span 2;
+        }
+
+        .clmn-tile img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            object-position: center;
+        }
+
+        /* 順番逆転 */
+        .grid-sort {
+            grid-template-columns: 1fr;
+        }
+
+        .clmn-sort {
+            grid-template-columns: auto 100px 1fr;
+            align-items: center;
+            grid-gap: 1rem;
+        }
+
+        .clmn-sort+.clmn-sort {
+            border-top: 1px solid #ddd;
+        }
+
+
+        #sort:checked~.grid-sort .clmn-sort:nth-child(1) {
+            order: 4;
+        }
+
+        #sort:checked~.grid-sort .clmn-sort:nth-child(2) {
+            order: 3;
+        }
+
+        #sort:checked~.grid-sort .clmn-sort:nth-child(3) {
+            order: 2;
+        }
+
+        #sort:checked~.grid-sort .clmn-sort:nth-child(4) {
+            order: 1;
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/styles/vs2015.min.css">
+</head>
+
+<body>
+
+    <div class="readtext">
+        CSS Gridによる様々なレイアウトの実装例です。
+    </div>
+
+
+    <h1>2カラム</h1>
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-2clm">
+                <div class="bg-red">
+                    サイドカラム（固定幅200px）
+                </div>
+                <div class="bg-green">
+                    メインカラム（余った幅全部）
+                </div>
+            </div>
+
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-2clm&quot;&gt;
+    &lt;div class=&quot;bg-red&quot;&gt;
+        &#x30B5;&#x30A4;&#x30C9;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x56FA;&#x5B9A;&#x5E45;200px&#xFF09;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-green&quot;&gt;
+        &#x30E1;&#x30A4;&#x30F3;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x4F59;&#x3063;&#x305F;&#x5E45;&#x5168;&#x90E8;&#xFF09;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-2clm {
+    grid-template-columns: 200px 1fr;
+}
+</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <h1>3カラム</h1>
+
+
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-3clm">
+                <div class="bg-red">
+                    左カラム（固定幅150px）
+                </div>
+                <div class="bg-green">
+                    メインカラム（余った幅全部）
+                </div>
+                <div class="bg-blue">
+                    サイドカラム（固定幅150px）
+                </div>
+            </div>
+
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-3clm&quot;&gt;
+    &lt;div class=&quot;bg-red&quot;&gt;
+        &#x5DE6;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x56FA;&#x5B9A;&#x5E45;150px&#xFF09;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-green&quot;&gt;
+        &#x30E1;&#x30A4;&#x30F3;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x4F59;&#x3063;&#x305F;&#x5E45;&#x5168;&#x90E8;&#xFF09;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-blue&quot;&gt;
+        &#x30B5;&#x30A4;&#x30C9;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x56FA;&#x5B9A;&#x5E45;150px&#xFF09;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-3clm {
+    grid-template-columns: 150px 1fr 150px;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <h1>聖杯</h1>
+
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-hg">
+                <div class="bg-orange clmn-header">
+                    ヘッダー
+                </div>
+                <div class="bg-red">
+                    左カラム（固定幅150px）
+                </div>
+                <div class="bg-green">
+                    メインカラム（余った幅全部）
+                </div>
+                <div class="bg-blue">
+                    サイドカラム（固定幅150px）
+                </div>
+                <div class="bg-orange clmn-footer">
+                    フッター
+                </div>
+            </div>
+
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-hg&quot;&gt;
+    &lt;div class=&quot;bg-orange clmn-header&quot;&gt;
+        &#x30D8;&#x30C3;&#x30C0;&#x30FC;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-red&quot;&gt;
+        &#x5DE6;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x56FA;&#x5B9A;&#x5E45;150px&#xFF09;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-green&quot;&gt;
+        &#x30E1;&#x30A4;&#x30F3;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x4F59;&#x3063;&#x305F;&#x5E45;&#x5168;&#x90E8;&#xFF09;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-blue&quot;&gt;
+        &#x30B5;&#x30A4;&#x30C9;&#x30AB;&#x30E9;&#x30E0;&#xFF08;&#x56FA;&#x5B9A;&#x5E45;150px&#xFF09;
+    &lt;/div&gt;
+    &lt;div class=&quot;bg-orange clmn-footer&quot;&gt;
+        &#x30D5;&#x30C3;&#x30BF;&#x30FC;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-hg {
+    grid-template-columns: 150px 1fr 150px;
+}
+
+.clmn-header,
+.clmn-footer {
+    grid-column: 1 / 4;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+
+
+    <h1>左写真、右テキスト、下揃えでボタン</h1>
+
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-photo">
+                <div class="clmn-photo">
+                    <img src="https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-text">
+                    説明文が入ります。説明文が入ります。説明文が入ります。説明文が入ります。説明文が入ります。
+                </div>
+                <div class="clmn-button">
+                    <a href="#">ボタン</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-photo&quot;&gt;
+    &lt;div class=&quot;clmn-photo&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-text&quot;&gt;
+        &#x8AAC;&#x660E;&#x6587;&#x304C;&#x5165;&#x308A;&#x307E;&#x3059;&#x3002;&#x8AAC;&#x660E;&#x6587;&#x304C;&#x5165;&#x308A;&#x307E;&#x3059;&#x3002;&#x8AAC;&#x660E;&#x6587;&#x304C;&#x5165;&#x308A;&#x307E;&#x3059;&#x3002;&#x8AAC;&#x660E;&#x6587;&#x304C;&#x5165;&#x308A;&#x307E;&#x3059;&#x3002;&#x8AAC;&#x660E;&#x6587;&#x304C;&#x5165;&#x308A;&#x307E;&#x3059;&#x3002;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-button&quot;&gt;
+        &lt;a href=&quot;#&quot;&gt;&#x30DC;&#x30BF;&#x30F3;&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-photo {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr auto;
+    grid-gap: 0 1rem
+}
+
+.clmn-photo {
+    grid-row: 1 / 3;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+    <h2>左右入れ替える</h2>
+
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-photo grid-photo-reverse">
+                <div class="clmn-photo">
+                    <img src="https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-text">
+                    説明文が入ります。説明文が入ります。説明文が入ります。説明文が入ります。説明文が入ります。
+                </div>
+                <div class="clmn-button">
+                    <a href="#">ボタン</a>
+                </div>
+            </div>
+
+        </div>
+        <div class="code">
+
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-photo-reverse .clmn-photo {
+    grid-column: 2 / 3;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+    <h1>左大バナー、右小バナー✕4</h1>
+
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-banner">
+                <div class="clmn-banner-l">
+                    <img src="https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-banner-s">
+                    <img src="https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-banner-s">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+
+                </div>
+                <div class="clmn-banner-s">
+                    <img src="https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+
+                </div>
+                <div class="clmn-banner-s">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+
+                </div>
+            </div>
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-banner&quot;&gt;
+    &lt;div class=&quot;clmn-banner-l&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-banner-s&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-banner-s&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-banner-s&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-banner-s&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-banner {
+    grid-template-columns: 2fr 1fr;
+    grid-auto-rows: 0.25fr
+}
+
+.clmn-banner-l {
+    grid-row: 1 / 5
+}
+
+.clmn-banner-s {
+    overflow: hidden;
+}
+
+.clmn-banner-s img {
+    object-fit: cover;
+    width: 100%;
+    height: 100%;
+    object-position: center center;
+}</code></pre>
+
+            </div>
+        </div>
+    </div>
+
+
+    <h1>折り返しのある一覧</h1>
+
+
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-list">
+                <div class="clmn-list">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                    あいうえお
+                </div>
+                <div class="clmn-list">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                    あいうえお
+                </div>
+                <div class="clmn-list">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                    あいうえお
+                </div>
+                <div class="clmn-list">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                    あいうえお
+                </div>
+                <div class="clmn-list">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                    あいうえお
+                </div>
+
+
+            </div>
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-list&quot;&gt;
+    &lt;div class=&quot;clmn-list&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+        &#x3042;&#x3044;&#x3046;&#x3048;&#x304A;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-list&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+        &#x3042;&#x3044;&#x3046;&#x3048;&#x304A;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-list&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+        &#x3042;&#x3044;&#x3046;&#x3048;&#x304A;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-list&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+        &#x3042;&#x3044;&#x3046;&#x3048;&#x304A;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-list&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+        &#x3042;&#x3044;&#x3046;&#x3048;&#x304A;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-list {
+    grid-template-columns: repeat(auto-fill, 150px);
+    grid-gap: 20px;
+}
+
+.clmn-list {
+    padding: 10px;
+    border: 1px solid #ddd;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    border-radius: 4px;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+
+    <h1>隙間なく敷き詰める</h1>
+    <div class="preview">
+        <div class="view">
+            <div class="grid grid-tile">
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+                <div class="clmn-tile">
+                    <img src="https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F" class="fluid">
+                </div>
+
+
+            </div>
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;div class=&quot;grid grid-tile&quot;&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/ff61a0/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;clmn-tile&quot;&gt;
+        &lt;img src=&quot;https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot; class=&quot;fluid&quot;&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-tile {
+    grid-template-columns: repeat(4, 1fr)
+}
+
+.clmn-tile:nth-child(5n - 4) {
+    grid-row: auto / span 2;
+    grid-column: auto / span 2;
+}
+
+.clmn-tile:nth-child(5n - 1) {
+    grid-row: auto / span 2;
+}
+
+.clmn-tile img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    object-position: center;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <h1>CSSだけで順番逆転</h1>
+    <div class="preview">
+        <div class="view">
+            <input type="checkbox" name="sort" id="sort">
+            <label for="sort">
+                順番を入れ替える
+            </label>
+            <div class="grid grid-sort">
+                <div class="grid clmn-sort">
+                    <div>1</div>
+                    <div><img src="https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F"
+                            class="fluid"></div>
+                    <div>これは1の商品です。</div>
+                </div>
+                <div class="grid clmn-sort">
+                    <div>2</div>
+                    <div><img src="https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F"
+                            class="fluid"></div>
+                    <div>これは2の商品です。</div>
+                </div>
+                <div class="grid clmn-sort">
+                    <div>3</div>
+                    <div><img src="https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F"
+                            class="fluid"></div>
+                    <div>これは3の商品です。</div>
+                </div>
+                <div class="grid clmn-sort">
+                    <div>4</div>
+                    <div><img src="https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F"
+                            class="fluid"></div>
+                    <div>これは4の商品です。</div>
+                </div>
+            </div>
+        </div>
+        <div class="code">
+            <div class="code-html">
+                <h3>HTML</h3>
+                <pre><code>&lt;input type=&quot;checkbox&quot; name=&quot;sort&quot; id=&quot;sort&quot;&gt;
+&lt;label for=&quot;sort&quot;&gt;
+    &#x9806;&#x756A;&#x3092;&#x5165;&#x308C;&#x66FF;&#x3048;&#x308B;
+&lt;/label&gt;
+&lt;div class=&quot;grid grid-sort&quot;&gt;
+    &lt;div class=&quot;grid clmn-sort&quot;&gt;
+        &lt;div&gt;1&lt;/div&gt;
+        &lt;div&gt;&lt;img src=&quot;https://placehold.jp/40baa2/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot;
+                class=&quot;fluid&quot;&gt;&lt;/div&gt;
+        &lt;div&gt;&#x3053;&#x308C;&#x306F;1&#x306E;&#x5546;&#x54C1;&#x3067;&#x3059;&#x3002;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;grid clmn-sort&quot;&gt;
+        &lt;div&gt;2&lt;/div&gt;
+        &lt;div&gt;&lt;img src=&quot;https://placehold.jp/3d4070/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot;
+                class=&quot;fluid&quot;&gt;&lt;/div&gt;
+        &lt;div&gt;&#x3053;&#x308C;&#x306F;2&#x306E;&#x5546;&#x54C1;&#x3067;&#x3059;&#x3002;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;grid clmn-sort&quot;&gt;
+        &lt;div&gt;3&lt;/div&gt;
+        &lt;div&gt;&lt;img src=&quot;https://placehold.jp/ff8861/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot;
+                class=&quot;fluid&quot;&gt;&lt;/div&gt;
+        &lt;div&gt;&#x3053;&#x308C;&#x306F;3&#x306E;&#x5546;&#x54C1;&#x3067;&#x3059;&#x3002;&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;grid clmn-sort&quot;&gt;
+        &lt;div&gt;4&lt;/div&gt;
+        &lt;div&gt;&lt;img src=&quot;https://placehold.jp/3e7061/ffffff/600x600.png?text=%E7%94%BB%E5%83%8F&quot;
+                class=&quot;fluid&quot;&gt;&lt;/div&gt;
+        &lt;div&gt;&#x3053;&#x308C;&#x306F;4&#x306E;&#x5546;&#x54C1;&#x3067;&#x3059;&#x3002;&lt;/div&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+</code></pre>
+            </div>
+            <div class="code-css">
+                <h3>CSS</h3>
+                <pre><code>.grid-sort {
+    grid-template-columns: 1fr;
+}
+
+.clmn-sort {
+    grid-template-columns: auto 100px 1fr;
+    align-items: center;
+    grid-gap: 1rem;
+}
+
+.clmn-sort+.clmn-sort {
+    border-top: 1px solid #ddd;
+}
+
+
+#sort:checked~.grid-sort .clmn-sort:nth-child(1) {
+    order: 4;
+}
+
+#sort:checked~.grid-sort .clmn-sort:nth-child(2) {
+    order: 3;
+}
+
+#sort:checked~.grid-sort .clmn-sort:nth-child(3) {
+    order: 2;
+}
+
+#sort:checked~.grid-sort .clmn-sort:nth-child(4) {
+    order: 1;
+}</code></pre>
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/9.15.10/highlight.min.js"></script>
+    <script>
+        hljs.initHighlightingOnLoad();
+    </script>
+
+</body>
+
+</html>
